@@ -1,15 +1,14 @@
 # Chat Backend Assignment
 
-Senior/lead-level backend implementation using **NestJS + Express + TypeScript + PostgreSQL + TypeORM + Firebase Firestore + JWT**.
+Senior/lead-level backend implementation using **Node.js + TypeScript + Express + PostgreSQL + Sequelize + Firebase Firestore + JWT**.
 
 ## Architecture
 
-- **NestJS** modules separate authentication, chats, and infrastructure.
-- **PostgreSQL/TypeORM** stores users, chats, and chat membership.
+- **Express** handles the HTTP server and route layer in plain TypeScript.
+- **PostgreSQL/Sequelize** stores users, chats, and chat membership.
 - **Firestore** stores message documents, read receipts (`readBy`), and last-seen records.
-- **JWT** guards authenticated API routes. A user may only operate on chats they belong to; user-scoped routes require the authenticated principal to match the requested user.
-- **Swagger** API docs are available at `/docs`.
-- **TypeORM migrations** are the only supported schema mutation mechanism. `synchronize` is disabled.
+- **JWT** authenticates API requests. A user may only operate on chats they belong to; user-scoped routes require the authenticated principal to match the requested user.
+- **Sequelize models** define the schema and the project uses a `sync` step for local database initialization.
 
 ## Requirements
 
@@ -30,49 +29,20 @@ docker compose up -d postgres
 
 Configure Firebase Admin credentials with either `FIREBASE_SERVICE_ACCOUNT_PATH` pointing to a service-account JSON file or `GOOGLE_APPLICATION_CREDENTIALS` in the environment. Do not commit the credential file.
 
-## TypeORM migration workflow
+## Sequelize database setup
 
-The checked-in initial migration creates all relational tables and constraints. To apply pending migrations:
-
-
-```bash
-npm run migration:run
-```
-
-Generate a migration after changing entities:
-
+The relational schema is defined in the Sequelize models. For local setup, sync the tables with:
 
 ```bash
-npm run migration:generate -- src/database/migrations/DescribeYourChange
+npm run db:sync
 ```
 
-Create an empty migration for hand-written SQL:
-
-
-```bash
-npm run migration:create -- src/database/migrations/DescribeYourChange
-```
-
-Roll back the most recently applied migration:
-
-
-```bash
-npm run migration:revert
-```
-
-List migration status:
-
-
-```bash
-npm run migration:show
-```
-
-**Important:** TypeORM's `migration:generate` compares registered entities against the current database schema and emits a migration diff. Review generated SQL before committing/running it. Keep migrations immutable after they have been applied in shared environments. Do not use `synchronize: true` in production.
+This creates the required PostgreSQL tables such as `users`, `chats`, and `chat_members` when they do not already exist.
 
 ## Start
 
 ```bash
-npm run migration:run
+npm run db:sync
 npm run start:dev
 ```
 
